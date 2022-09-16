@@ -5,44 +5,27 @@ contributions:
     - id: napari-genome-viz.get_reader
       python_name: napari_genome_viz._reader:napari_get_reader
       title: Open data with Napari 4d Genome Vizualisation
-    - id: napari-genome-viz.write_multiple
-      python_name: napari_genome_viz._writer:write_multiple
-      title: Save multi-layer data with Napari 4d Genome Vizualisation
-    - id: napari-genome-viz.write_single_image
-      python_name: napari_genome_viz._writer:write_single_image
-      title: Save image data with Napari 4d Genome Vizualisation
-    - id: napari-genome-viz.make_sample_data
-      python_name: napari_genome_viz._sample_data:make_sample_data
-      title: Load sample data from Napari 4d Genome Vizualisation
-    - id: napari-genome-viz.make_qwidget
-      python_name: napari_genome_viz._widget:ExampleQWidget
-      title: Make example QWidget
-    - id: napari-genome-viz.make_magic_widget
-      python_name: napari_genome_viz._widget:example_magic_widget
-      title: Make example magic widget
-    - id: napari-genome-viz.make_func_widget
-      python_name: napari_genome_viz._widget:example_function_widget
-      title: Make example function widget
+    - id: napari-genome-viz.get_interp_lines_widget
+      python_name: napari_genome_viz._widget:plot_interp_lines
+      title: open interpolated lines widget
+    - id: napari-genome-viz.get_straight_lines_widget
+      python_name: napari_genome_viz._widget:plot_straight_lines
+      title: open straight lines widget
+    - id: napari-genome-viz.get_plot_widget
+      python_name: napari_genome_viz._widget:plot_dist_matrix
+      title: open plot widget
   readers:
     - command: napari-genome-viz.get_reader
       accepts_directories: false
-      filename_patterns: ['*.npy']
-  writers:
-    - command: napari-genome-viz.write_multiple
-      layer_types: ['image*','labels*']
-      filename_extensions: []
-    - command: napari-genome-viz.write_single_image
-      layer_types: ['image']
-      filename_extensions: ['.npy']
+      filename_patterns: ['*.csv']
   sample_data:
-    - command: napari-genome-viz.make_sample_data
-      display_name: Napari 4d Genome Vizualisation
-      key: unique_id.1
+    - key: unique_id.1
+      display_name: Napari 4d Genome Vizualisation - Example Chr19 toy dataset (3 traces)
+      uri: src/napari_genome_viz/sample_data/chr19_3traces.csv
   widgets:
-    - command: napari-genome-viz.make_qwidget
-      display_name: Example QWidget
-    - command: napari-genome-viz.make_magic_widget
-      display_name: Example Magic Widget
-    - command: napari-genome-viz.make_func_widget
-      autogenerate: true
-      display_name: Example Function Widget
+    - command: napari-genome-viz.get_interp_lines_widget
+      display_name: Get Interpolated Lines # shown in plugin menu
+    - command: napari-genome-viz.get_straight_lines_widget
+      display_name: Get Straight Lines # shown in plugin menu
+    - command: napari-genome-viz.get_plot_widget
+      display_name: Get distance matrix heatmap # shown in plugin menu

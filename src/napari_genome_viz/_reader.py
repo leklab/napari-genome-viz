@@ -1,35 +1,41 @@
-"""
-This module is an example of a barebones numpy reader plugin for napari.
+import os
+import re
 
-It implements the Reader specification, but your plugin may choose to
-implement multiple readers or even other plugin contributions. see:
-https://napari.org/plugins/guides.html?#readers
-"""
 import numpy as np
+import pandas as pd
 
 
 def napari_get_reader(path):
-    """A basic implementation of a Reader contribution.
+    """Returns reader if path contains data in
+    4DN standard FISH-Omics Format - Chromatin Tracing (FOF-CT)
+    Specifically DNA-Spot/Trace Data core table (info on format
+    https://fish-omics-format.readthedocs.io/en/latest/core.html#core)
+    otherwise None.
 
-    Parameters
-    ----------
-    path : str or list of str
-        Path to file, or list of paths.
-
-    Returns
-    -------
-    function or None
-        If the path is a recognized format, return a function that accepts the
-        same path or list of paths, and returns a list of layer data tuples.
+    :param path: path to be opened by reader
+    :type path: str
+    :return: reader function or None
     """
-    if isinstance(path, list):
-        # reader plugins may be handed single path, or a list of paths.
-        # if it is a list, it is assumed to be an image stack...
-        # so we are only going to look at the first file.
-        path = path[0]
 
-    # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".npy"):
+    file = os.path.abspath(path)
+
+    # if header does not indicate FOF-CT data format, return None
+    with open(file, "rb") as f:
+        firstline = f.readline().rstrip().decode("utf-8")
+
+    if firstline.find("FOF-CT") == -1:
+        return None
+
+    # if header does not indicate file contains correct columns, return None
+    with open(file, encoding="ISO-8859-1") as f:
+        header = ""
+        for line in f:
+            if line.startswith("#"):
+                header += line
+            else:
+                break  # stop when there are no more #
+
+    if header.find("Trace_ID, X, Y, Z") == -1:
         return None
 
     # otherwise we return the *function* that can read ``path``.
@@ -37,36 +43,80 @@ def napari_get_reader(path):
 
 
 def reader_function(path):
-    """Take a path or list of paths and return a list of LayerData tuples.
-
-    Readers are expected to return data as a list of tuples, where each tuple
-    is (data, [add_kwargs, [layer_type]]), "add_kwargs" and "layer_type" are
-    both optional.
+    """Take a path and return a list of LayerData tuples.
 
     Parameters
     ----------
     path : str or list of str
-        Path to file, or list of paths.
+        Path to file.
 
     Returns
     -------
     layer_data : list of tuples
         A list of LayerData tuples where each tuple in the list contains
-        (data, metadata, layer_type), where data is a numpy array, metadata is
-        a dict of keyword arguments for the corresponding viewer.add_* method
-        in napari, and layer_type is a lower-case string naming the type of
-        layer. Both "meta", and "layer_type" are optional. napari will
-        default to layer_type=="image" if not provided
+        (data, metadata, layer_type), where data is a numpy array,
+        metadata is a dict of keyword arguments for the corresponding
+        viewer.add_* method in napari, and layer_type is a
+        lower-case string naming the type of layer.
+
+        Reader takes DNA-Spot/Trace Data core table, splits it into
+        Traces and plots them with a mapped colour spectrum corresponding
+        to the point's position along the trace.
     """
-    # handle both a string and a list of strings
-    paths = [path] if isinstance(path, str) else path
-    # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
 
-    # optional kwargs for the corresponding viewer.add_* method
-    add_kwargs = {}
+    path = os.path.abspath(path)
 
-    layer_type = "image"  # optional, default is "image"
-    return [(data, add_kwargs, layer_type)]
+    # read in file
+    df = pd.read_csv(path, comment="#", header=None, encoding="ISO-8859-1")
+
+    # get column names
+    # if header does not indicate file contains correct columns, return None
+    with open(path, encoding="ISO-8859-1") as f:
+        header = ""
+        for line in f:
+            if line.startswith("#"):
+                header += line
+            else:
+                break  # stop when there are no more #
+
+    column_names = re.findall(r"(?<=columns=\()(.*)(?=\))", header)
+    df.columns = column_names[0].split(", ")
+
+    # get trace coords and ids
+    trace_coords = df[["X", "Y", "Z"]].values
+    trace_ids = df[["Trace_ID"]]
+
+    # number of traces in data
+    trace_counts = trace_ids.value_counts()[
+        trace_ids["Trace_ID"].unique()
+    ].tolist()
+
+    # split point coordinates into arrays by trace lengths
+    trace_coords_split = [
+        x
+        for x in np.split(trace_coords, np.cumsum(trace_counts)[:-1], axis=0)
+        if x.size > 0
+    ]
+
+    layers = []
+
+    traces = list(range(0, len(trace_ids["Trace_ID"].unique())))
+
+    for trace in traces:
+        trace_coords_trace = trace_coords_split[trace]
+        # get colormap coordinates for each trace
+        x = trace_counts[trace]
+        colormap_values = np.arange(1, x + 1) / x
+        # colormap_values = [i for i in chain.from_iterable(colormap_values)]
+        # set region numbers which will map to colour spectrum
+        point_properties = {"region_number": colormap_values}
+        probe_kwargs = dict(
+            properties=point_properties,
+            face_color="region_number",
+            size=0.3,
+            edge_width=0,
+            shading="spherical",
+            name="trace " + str(trace_ids["Trace_ID"].unique()[trace]),
+        )
+        layers.extend([(trace_coords_trace, probe_kwargs, "points")])
+    return layers

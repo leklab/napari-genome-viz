@@ -21,7 +21,7 @@ contributions:
   sample_data:
     - key: unique_id.1
       display_name: Napari 4d Genome Vizualisation - Example Chr19 toy dataset (3 traces)
-      uri: https://github.com/RubyDawes/napari-genome-viz/blob/main/src/napari_genome_viz/sample_data/chr19_3traces.csv
+      uri: https://raw.githubusercontent.com/RubyDawes/napari-genome-viz/main/src/napari_genome_viz/sample_data/chr19_3traces.csv
   widgets:
     - command: napari-genome-viz.get_interp_lines_widget
       display_name: Get Interpolated Lines # shown in plugin menu

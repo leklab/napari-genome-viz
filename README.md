@@ -19,10 +19,7 @@ This plugin allows visualisation of chromatin traces uniformly presented in the 
 
 ## Installation
 
-You can install `napari-genome-viz` via [pip]:
-
-    pip install napari-genome-viz
-
+First, install napari using instructions here: https://napari.org/stable/tutorials/fundamentals/installation.html
 
 To install latest development version :
 

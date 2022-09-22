@@ -21,7 +21,7 @@ contributions:
   sample_data:
     - key: unique_id.1
       display_name: Napari 4d Genome Vizualisation - Example Chr19 toy dataset (3 traces)
-      uri: pathlib.Path(__file__).parent / '/sample_data/chr19_3traces.csv'
+      uri: os.path.join(os.path.dirname(os.path.abspath(__file__)) ,'/sample_data/chr19_3traces.csv')
   widgets:
     - command: napari-genome-viz.get_interp_lines_widget
       display_name: Get Interpolated Lines # shown in plugin menu

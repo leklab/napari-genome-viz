@@ -19,12 +19,20 @@ This plugin allows visualisation of chromatin traces uniformly presented in the 
 
 ## Installation
 
-First, install napari using instructions here: https://napari.org/stable/tutorials/fundamentals/installation.html
+First, install napari by setting up a conda environment and following instructions below
+```
+conda create -y -n napari-env -c conda-forge python=3.9
+conda activate napari-env
+conda install -c conda-forge napari
+pip install napari --upgrade
+```
+More information on the Napari website https://napari.org/stable/tutorials/fundamentals/installation.html  
+Please refer to issues page summarizing the issues we had trying to install it other ways on MacOS
 
-To install latest development version :
-
-    pip install git+https://github.com/RubyDawes/napari-genome-viz.git
-
+Next install latest development version of this plugin
+```
+pip install git+https://github.com/RubyDawes/napari-genome-viz.git
+```
 
 ## Usage Guide
 

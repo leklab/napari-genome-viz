@@ -1,5 +1,7 @@
 import os
 import re
+import urllib.request
+import ssl
 
 import numpy as np
 import pandas as pd
@@ -17,23 +19,28 @@ def napari_get_reader(path):
     :return: reader function or None
     """
 
-    file = os.path.abspath(path)
+    if path.startswith('http'):
+        f = urllib.request.urlopen(path)
+    else:
+        file = os.path.abspath(path)
+        f = open(file, "rb")
 
     # if header does not indicate FOF-CT data format, return None
-    with open(file, "rb") as f:
-        firstline = f.readline().rstrip().decode("utf-8")
+    #with open(file, "rb") as f:
+    firstline = f.readline().rstrip().decode("utf-8")
 
     if firstline.find("FOF-CT") == -1:
         return None
 
     # if header does not indicate file contains correct columns, return None
-    with open(file, encoding="ISO-8859-1") as f:
-        header = ""
-        for line in f:
-            if line.startswith("#"):
-                header += line
-            else:
-                break  # stop when there are no more #
+    #with open(file, encoding="ISO-8859-1") as f:
+    header = ""
+    for line in f:
+        line = line.decode("ISO-8859-1")
+        if line.startswith("#"):
+            header += line
+        else:
+            break  # stop when there are no more #
 
     if header.find("Trace_ID, X, Y, Z") == -1:
         return None
@@ -64,20 +71,25 @@ def reader_function(path):
         to the point's position along the trace.
     """
 
-    path = os.path.abspath(path)
+    if path.startswith('http'):
+        f = urllib.request.urlopen(path)
+    else:
+        path = os.path.abspath(path)
+        f = open(path, "rb")
 
     # read in file
     df = pd.read_csv(path, comment="#", header=None, encoding="ISO-8859-1")
 
     # get column names
     # if header does not indicate file contains correct columns, return None
-    with open(path, encoding="ISO-8859-1") as f:
-        header = ""
-        for line in f:
-            if line.startswith("#"):
-                header += line
-            else:
-                break  # stop when there are no more #
+    #with open(path, encoding="ISO-8859-1") as f:
+    header = ""
+    for line in f:
+        line = line.decode("ISO-8859-1")
+        if line.startswith("#"):
+            header += line
+        else:
+            break  # stop when there are no more #
 
     column_names = re.findall(r"(?<=columns=\()(.*)(?=\))", header)
     df.columns = column_names[0].split(", ")

@@ -1,35 +1,35 @@
-name: napari-genome-viz
+name: napari_genome_viz
 display_name: Napari 4d Genome Vizualisation
 contributions:
   commands:
-    - id: napari-genome-viz.get_reader
+    - id: napari_genome_viz.get_reader
       python_name: napari_genome_viz._reader:napari_get_reader
       title: Open data with Napari 4d Genome Vizualisation
-    - id: napari-genome-viz.get_interp_lines_widget
+    - id: napari_genome_viz.get_interp_lines_widget
       python_name: napari_genome_viz._widget:plot_interp_lines
       title: open interpolated lines widget
-    - id: napari-genome-viz.get_straight_lines_widget
+    - id: napari_genome_viz.get_straight_lines_widget
       python_name: napari_genome_viz._widget:plot_straight_lines
       title: open straight lines widget
-    - id: napari-genome-viz.get_plot_widget
+    - id: napari_genome_viz.get_plot_widget
       python_name: napari_genome_viz._widget:plot_dist_matrix
       title: open plot widget
   readers:
-    - command: napari-genome-viz.get_reader
+    - command: napari_genome_viz.get_reader
       accepts_directories: false
       filename_patterns: ['*.csv']
   sample_data:
     - key: unique_id.1
       display_name: Napari 4d Genome Vizualisation - Example Chr19 toy dataset (3 traces)
-      uri: https://raw.githubusercontent.com/RubyDawes/napari-genome-viz/main/src/napari_genome_viz/sample_data/chr19_3traces.csv
-      reader_plugin: napari-genome-viz
+      uri: https://raw.githubusercontent.com/leklab/napari-genome-viz/main/src/napari_genome_viz/sample_data/chr19_3traces.csv
+      reader_plugin: napari_genome_viz
     - key: napari
       display_name: Tabueran Kiribati
       uri: https://en.wikipedia.org/wiki/Napari#/media/File:Tabuaeran_Kiribati.jpg
   widgets:
-    - command: napari-genome-viz.get_interp_lines_widget
+    - command: napari_genome_viz.get_interp_lines_widget
       display_name: Get Interpolated Lines # shown in plugin menu
-    - command: napari-genome-viz.get_straight_lines_widget
+    - command: napari_genome_viz.get_straight_lines_widget
       display_name: Get Straight Lines # shown in plugin menu
-    - command: napari-genome-viz.get_plot_widget
+    - command: napari_genome_viz.get_plot_widget
       display_name: Get distance matrix heatmap # shown in plugin menu
